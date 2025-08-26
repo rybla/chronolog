@@ -108,6 +108,7 @@ unifyExpr e1 e2 = do
   unifyExpr' e1' e2'
 
 unifyExpr' :: (Monad m, Ord v, Eq c, Pretty v, Pretty c) => Expr c v -> Expr c v -> T a c v m (Expr c v)
+unifyExpr' e1 e2 | e1 == e2 = return e2
 unifyExpr' (VarExpr x1) e2 = do
   setVarM x1 e2
   return e2
