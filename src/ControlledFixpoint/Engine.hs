@@ -524,7 +524,14 @@ tryRule goal rule = do
             env_beforeUnification
               { suspendedGoals =
                   env.suspendedGoals
-                    <> [goal {goalOpts = goal.goalOpts {constrainedRulesetGoalOpt = Just (Set.fromList [rule.name])}}]
+                    <> [ goal
+                           { goalOpts =
+                               goal.goalOpts
+                                 { constrainedRulesetGoalOpt = Just (Set.fromList [rule.name]),
+                                   requiredGoalOpt = True
+                                 }
+                           }
+                       ]
               }
           tellMsgs
             [ (Msg.mk 1 "suspended goal for just this rule")
