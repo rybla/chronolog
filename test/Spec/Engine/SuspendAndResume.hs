@@ -17,7 +17,7 @@ tests =
         "simple suspend"
         Engine.Config
           { initialGas = FiniteGas 50,
-            strategy = DepthFirstStrategy,
+            strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
             rules =
               [ (mkRule "R1")
                   []
@@ -41,7 +41,7 @@ tests =
         "simple nonterminating"
         Engine.Config
           { initialGas = FiniteGas 10,
-            strategy = DepthFirstStrategy,
+            strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
             rules =
               [ (mkRule "R1")
                   [GoalHyp . mkHypGoal $ A :~ S "x"]
@@ -80,7 +80,7 @@ unrolling_tests =
     cfg =
       Engine.Config
         { initialGas = FiniteGas 10,
-          strategy = DepthFirstStrategy,
+          strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
           rules = rules1,
           exprAliases = [],
           shouldSuspend = const False,

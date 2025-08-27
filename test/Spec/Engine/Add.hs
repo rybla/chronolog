@@ -30,7 +30,7 @@ mkTest a b c =
     (render $ pPrint a <+> "+" <+> pPrint b <+> "=" <+> pPrint c)
     ( Config
         { initialGas = FiniteGas 50,
-          strategy = DepthFirstStrategy,
+          strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
           rules = rulesAdd,
           exprAliases = [],
           goals = [mkGoal 0 $ fromIntegral a :+ fromIntegral b :== fromIntegral c],

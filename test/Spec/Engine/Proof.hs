@@ -83,7 +83,7 @@ tests_Norm_v1 =
         testName
         Engine.Config
           { goals = [mkGoal 0 $ Valid (in_ :⇓ "?out") "?{in ⇓ out}"],
-            strategy = DepthFirstStrategy,
+            strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
             rules = rules_v1,
             exprAliases = [],
             shouldSuspend = \case

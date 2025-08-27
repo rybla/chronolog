@@ -17,7 +17,7 @@ tests =
         "v1"
         ( Engine.Config
             { initialGas = FiniteGas 50,
-              strategy = DepthFirstStrategy,
+              strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
               rules =
                 [ (mkRule "P 1")
                     []

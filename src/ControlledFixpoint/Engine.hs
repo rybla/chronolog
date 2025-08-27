@@ -1,9 +1,5 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# HLINT ignore "Redundant $" #-}
-{-# HLINT ignore "Use newtype instead of data" #-}
-{-# HLINT ignore "Evaluate" #-}
-{-# HLINT ignore "Use if" #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -12,14 +8,20 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -Wno-partial-fields #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use ||" #-}
+{-# HLINT ignore "Redundant $" #-}
+{-# HLINT ignore "Use newtype instead of data" #-}
+{-# HLINT ignore "Evaluate" #-}
+{-# HLINT ignore "Use if" #-}
+{-# OPTIONS_GHC -Wno-unused-do-bind #-}
 
 module ControlledFixpoint.Engine where
 
 import Control.Lens ((^.))
-import Control.Monad (foldM, unless, void, when)
+import Control.Monad (foldM, unless, when)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
-import Control.Monad.Reader (MonadReader (ask), ReaderT (runReaderT))
-import Control.Monad.State (MonadState (..), StateT (..), evalStateT, execStateT, gets, modify, runState, runStateT)
+import Control.Monad.Reader (ReaderT, ask, runReaderT)
+import Control.Monad.State (StateT (..), evalStateT, execStateT, get, gets, modify, runState, runStateT)
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Writer (WriterT)
 import qualified Control.Monad.Writer as Writer
@@ -70,7 +72,7 @@ defaultConfig =
       goals = [],
       shouldSuspend = const False,
       exprAliases = [],
-      strategy = DepthFirstStrategy
+      strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts
     }
 
 instance (Pretty a, Pretty c, Pretty v) => Pretty (Config a c v) where
@@ -203,10 +205,30 @@ data Strategy
     -- A depth-first strategy:
     --   - subgoals are inserted at the beginning of the list of subgoals to
     --     solve next, so they are to be solved before any pre-existing subgoals
-    DepthFirstStrategy
-  deriving (Eq, Show, Enum, Bounded)
+    DepthFirstStrategy DepthFirstStrategyOpts
+  deriving (Eq, Show)
 
 instance Pretty Strategy where
+  pPrint = text . show
+
+data DepthFirstStrategyOpts = DepthFirstStrategyOpts
+  { -- | Whether or not to consider failing branches. `agressive == True`
+    -- essentially implies that all goals are treated as required.
+    aggressiveDepthFirstStrategyOpt :: Bool
+  }
+  deriving (Eq, Show)
+
+defaultDepthFirstStrategyOpts :: DepthFirstStrategyOpts
+defaultDepthFirstStrategyOpts =
+  DepthFirstStrategyOpts
+    { aggressiveDepthFirstStrategyOpt = False
+    }
+
+isAggressiveStrategy :: Strategy -> Bool
+isAggressiveStrategy (DepthFirstStrategy opts) = opts.aggressiveDepthFirstStrategyOpt
+isAggressiveStrategy _ = False
+
+instance Pretty DepthFirstStrategyOpts where
   pPrint = text . show
 
 instance Pretty Error where
@@ -427,24 +449,18 @@ tryRules goal = do
 
       modify \env -> env {failedGoals = env.failedGoals <> [goal]}
 
-      when goal.goalOpts.requiredGoalOpt do
-        env <- get
-        tellMsgs
-          [ (Msg.mk 1 "pruning branch since faild a required goal")
-              { Msg.contents =
-                  [ "goal =" <+> pPrint goal,
-                    "env =" <+> pPrint env
-                  ]
-              }
-          ]
-        void $
+      when
+        ( or
+            [ isAggressiveStrategy ctx.config.strategy,
+              goal.goalOpts.requiredGoalOpt
+            ]
+        )
+        do
+          env <- get
+          tellMsgs [(Msg.mk 1 "pruning branch since faild a required goal") {Msg.contents = ["goal =" <+> pPrint goal, "env =" <+> pPrint env]}]
           env.suspendedGoals <&>>= \goal' ->
-            tell_traceStep
-              FailureStep
-                { goal = goal',
-                  reason = "failed other required goal:" <+> pPrint goal
-                }
-        reject
+            tell_traceStep FailureStep {goal = goal', reason = "failed other required goal:" <+> pPrint goal}
+          reject
     else do
       let cutBranches =
             branches & filterMap \(rule, env) ->
@@ -578,8 +594,10 @@ tryRule goal rule = do
                 activeGoals =
                   substGoal sigma_uni
                     <$> case ctx.config.strategy of
+                      -- for a breadth first strategy, process old goals before new goals
                       BreadthFirstStrategy -> env.activeGoals <> subgoals
-                      DepthFirstStrategy -> subgoals <> env.activeGoals,
+                      -- for a depth first strategy, process new goals before old goals
+                      DepthFirstStrategy _opts -> subgoals <> env.activeGoals,
                 sigma =
                   composeSubst_unsafe sigma_uni env.sigma
               }
