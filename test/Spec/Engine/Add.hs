@@ -6,8 +6,8 @@
 
 module Spec.Engine.Add (tests) where
 
-import ControlledFixpoint.Engine as Engine
-import ControlledFixpoint.Grammar
+import Chronolog.Engine as Engine
+import Chronolog.Grammar
 import Spec.Engine.Common
 import Test.Tasty (TestTree, testGroup)
 import Text.PrettyPrint (render, (<+>))

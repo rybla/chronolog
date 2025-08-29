@@ -9,12 +9,12 @@
 {-# HLINT ignore "Avoid lambda using `infix`" #-}
 {-# HLINT ignore "Use ++" #-}
 
-module ControlledFixpoint.Html where
+module Chronolog.Html where
 
 import Control.Monad (when)
 import Control.Monad.State (State, execState, get, modify)
-import ControlledFixpoint.Engine
-import ControlledFixpoint.Grammar
+import Chronolog.Engine
+import Chronolog.Grammar
 import Data.Foldable (traverse_)
 import Data.Function ((&))
 import Data.Functor ((<&>))

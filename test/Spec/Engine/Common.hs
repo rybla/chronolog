@@ -10,11 +10,11 @@ import Control.Category ((>>>))
 import Control.Monad (when)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Writer (WriterT (runWriterT))
-import ControlledFixpoint.Common.Msg (Msg)
-import qualified ControlledFixpoint.Common.Msg as Msg
-import ControlledFixpoint.Engine as Engine
-import ControlledFixpoint.Grammar
-import ControlledFixpoint.Html (renderHtml, renderTrace)
+import Chronolog.Common.Msg (Msg)
+import qualified Chronolog.Common.Msg as Msg
+import Chronolog.Engine as Engine
+import Chronolog.Grammar
+import Chronolog.Html (renderHtml, renderTrace)
 import Data.Foldable (traverse_)
 import Data.Function ((&))
 import Data.Functor ((<&>))
@@ -51,7 +51,7 @@ type V = String
 -- A `EngineResult` has some optional associated metadata about how the run
 -- went.
 data EngineResult c v
-  = -- | Engine run threw a global error (in `ControlledFixpoint.Common.T`).
+  = -- | Engine run threw a global error (in `Chronolog.Common.T`).
     EngineErrorCatastrophic (Maybe Msg)
   | -- | Engine run threw a local error.
     EngineError Engine.Error

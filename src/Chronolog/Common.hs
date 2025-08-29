@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-module ControlledFixpoint.Common where
+module Chronolog.Common where
 
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (WriterT)
-import ControlledFixpoint.Common.Msg (Msg)
+import Chronolog.Common.Msg (Msg)
 
 type T m =
   (ExceptT Msg)

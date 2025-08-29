@@ -10,15 +10,15 @@
 {-# HLINT ignore "Use newtype instead of data" #-}
 {-# HLINT ignore "Use ++" #-}
 
-module ControlledFixpoint.Grammar where
+module Chronolog.Grammar where
 
 import Control.Applicative ((<|>))
 import Control.Monad (unless)
 import Control.Monad.Error.Class (MonadError (throwError))
 import Control.Monad.Writer (MonadWriter, tell)
 import Control.Newtype.Generics (Newtype, over)
-import ControlledFixpoint.Common.Msg (Msg)
-import qualified ControlledFixpoint.Common.Msg as Msg
+import Chronolog.Common.Msg (Msg)
+import qualified Chronolog.Common.Msg as Msg
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import qualified Data.List.Safe as List

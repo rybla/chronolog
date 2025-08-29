@@ -1,4 +1,4 @@
-# Changelog for `controlled-fixpoint-v1`
+# Changelog for `chronolog`
 
 All notable changes to this project will be documented in this file.
 

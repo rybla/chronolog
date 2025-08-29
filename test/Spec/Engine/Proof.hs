@@ -10,8 +10,8 @@
 
 module Spec.Engine.Proof (tests) where
 
-import ControlledFixpoint.Engine as Engine
-import ControlledFixpoint.Grammar
+import Chronolog.Engine as Engine
+import Chronolog.Grammar
 import Data.Function ((&))
 import qualified Data.Map as Map
 import Spec.Engine.Common

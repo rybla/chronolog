@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-module ControlledFixpoint.Common.Msg where
+module Chronolog.Common.Msg where
 
 import Text.PrettyPrint (Doc, brackets, nest, vcat, (<+>))
 import Text.PrettyPrint.HughesPJClass (Pretty (pPrint))

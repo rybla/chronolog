@@ -5,11 +5,11 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-module ControlledFixpoint.Library.AugmentGoalTrace where
+module Chronolog.Library.AugmentGoalTrace where
 
 import Control.Lens (FunctorWithIndex (imap))
-import qualified ControlledFixpoint.Engine as Engine
-import ControlledFixpoint.Grammar
+import qualified Chronolog.Engine as Engine
+import Chronolog.Grammar
 import Data.Function
 import Data.Functor ((<&>))
 import qualified Data.List.Safe as List

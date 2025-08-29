@@ -7,8 +7,8 @@ module Main (main) where
 -- import Control.Monad (void)
 -- import Control.Monad.Except (runExceptT)
 -- import Control.Monad.Writer (WriterT (runWriterT))
--- import qualified ControlledFixpoint.Engine as Engine
--- import ControlledFixpoint.Grammar
+-- import qualified Chronolog.Engine as Engine
+-- import Chronolog.Grammar
 -- import Data.String (IsString (fromString))
 -- import Text.PrettyPrint (hang, render)
 -- import Text.PrettyPrint.HughesPJClass (Pretty (pPrint))

@@ -1,6 +1,6 @@
-name: controlled-fixpoint-v1
+name: chronolog
 version: 0.1.0.0
-github: "rybla/controlled-fixpoint-v1"
+github: "rybla/chronolog"
 license: BSD-3-Clause
 author: "Henry Blanchette"
 maintainer: "henry@rybl.net"
@@ -19,7 +19,7 @@ extra-source-files:
 # common to point users to the README.md file.
 description:
   Please see the README on GitHub at
-  <https://github.com/rybla/controlled-fixpoint-v1#readme>
+  <https://github.com/rybla/chronolog#readme>
 
 default-extensions:
   - LambdaCase
@@ -59,7 +59,7 @@ library:
   source-dirs: src
 
 executables:
-  controlled-fixpoint-v1-exe:
+  chronolog-exe:
     main: Main.hs
     source-dirs: app
     ghc-options:
@@ -67,12 +67,12 @@ executables:
       - -rtsopts
       - -with-rtsopts=-N
     dependencies:
-      - controlled-fixpoint-v1
+      - chronolog
       - filepath
       - parseargs
 
 tests:
-  controlled-fixpoint-v1-test:
+  chronolog-test:
     main: Spec.hs
     source-dirs: test
     ghc-options:
@@ -80,7 +80,7 @@ tests:
       - -rtsopts
       - -with-rtsopts=-N
     dependencies:
-      - controlled-fixpoint-v1
+      - chronolog
       - filepath
       - tasty
       - tasty-hunit

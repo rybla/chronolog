@@ -6,8 +6,8 @@
 
 module Spec.Engine.ExistentialVariables (tests) where
 
-import ControlledFixpoint.Engine
-import ControlledFixpoint.Grammar
+import Chronolog.Engine
+import Chronolog.Grammar
 import Data.Function ((&))
 import qualified Data.Set as Set
 import Spec.Engine.Common

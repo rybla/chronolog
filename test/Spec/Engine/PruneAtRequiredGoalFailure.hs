@@ -6,8 +6,8 @@
 
 module Spec.Engine.PruneAtRequiredGoalFailure (tests) where
 
-import qualified ControlledFixpoint.Engine as Engine
-import ControlledFixpoint.Grammar
+import qualified Chronolog.Engine as Engine
+import Chronolog.Grammar
 import Spec.Engine.Common (mkTest_Engine)
 import qualified Spec.Engine.Common as Common
 import Test.Tasty (TestTree, testGroup)

@@ -2,7 +2,7 @@
 
 module Spec.Config where
 
-import qualified ControlledFixpoint.Common.Msg as Msg
+import qualified Chronolog.Common.Msg as Msg
 
 data Verbosity
   = SilentVerbosity

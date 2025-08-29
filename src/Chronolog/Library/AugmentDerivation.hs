@@ -3,11 +3,11 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-module ControlledFixpoint.Library.AugmentDerivation where
+module Chronolog.Library.AugmentDerivation where
 
 import Control.Lens (FunctorWithIndex (imap))
-import qualified ControlledFixpoint.Engine as Engine
-import ControlledFixpoint.Grammar
+import qualified Chronolog.Engine as Engine
+import Chronolog.Grammar
 import Data.Bifunctor (second)
 import Data.Coerce (coerce)
 import Data.Function

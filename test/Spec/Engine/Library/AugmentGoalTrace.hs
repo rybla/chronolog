@@ -5,9 +5,9 @@
 
 module Spec.Engine.Library.AugmentGoalTrace (tests) where
 
-import ControlledFixpoint.Engine as Engine
-import ControlledFixpoint.Grammar
-import ControlledFixpoint.Library.AugmentGoalTrace as AugmentGoalTrace
+import Chronolog.Engine as Engine
+import Chronolog.Grammar
+import Chronolog.Library.AugmentGoalTrace as AugmentGoalTrace
 import Data.String (IsString (fromString))
 import Spec.Engine.Common hiding (goldenDirpath)
 import qualified Spec.Engine.Common as Common

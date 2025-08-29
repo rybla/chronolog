@@ -10,7 +10,7 @@
 {-# HLINT ignore "Use newtype instead of data" #-}
 {-# HLINT ignore "Redundant $" #-}
 
-module ControlledFixpoint.Unification where
+module Chronolog.Unification where
 
 import Control.Lens (makeLenses, (%=), (.=), (^.))
 import Control.Monad (when, zipWithM)
@@ -19,9 +19,9 @@ import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.State (StateT, gets)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (tell)
-import qualified ControlledFixpoint.Common as Common
-import qualified ControlledFixpoint.Common.Msg as Msg
-import ControlledFixpoint.Grammar
+import qualified Chronolog.Common as Common
+import qualified Chronolog.Common.Msg as Msg
+import Chronolog.Grammar
 import Data.Function ((&))
 import qualified Data.Map as Map
 import qualified Data.Set as Set

@@ -8,8 +8,8 @@
 
 module Spec.Engine.RuleSpecificSuspend (tests) where
 
-import ControlledFixpoint.Engine
-import ControlledFixpoint.Grammar
+import Chronolog.Engine
+import Chronolog.Grammar
 import Data.Function ((&))
 import Spec.Engine.Common
 import Test.Tasty (TestTree, testGroup)

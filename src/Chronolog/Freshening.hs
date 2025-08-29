@@ -1,10 +1,10 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-module ControlledFixpoint.Freshening where
+module Chronolog.Freshening where
 
 import Control.Monad.State (MonadState (..), State, modify)
-import ControlledFixpoint.Grammar
+import Chronolog.Grammar
 import Data.Function ((&))
 import Data.Set (Set)
 import qualified Data.Set as Set

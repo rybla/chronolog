@@ -6,9 +6,9 @@ import Control.Monad.Except (runExceptT)
 import Control.Monad.Reader (ReaderT (runReaderT))
 import Control.Monad.State (StateT (runStateT))
 import Control.Monad.Writer (WriterT (runWriterT))
-import ControlledFixpoint.Grammar
-import ControlledFixpoint.Unification (unifyAtom)
-import qualified ControlledFixpoint.Unification as Unification
+import Chronolog.Grammar
+import Chronolog.Unification (unifyAtom)
+import qualified Chronolog.Unification as Unification
 import Data.Function ((&))
 import Test.Tasty (TestName, TestTree, testGroup)
 import Test.Tasty.HUnit (assertFailure, testCase, (@?=))

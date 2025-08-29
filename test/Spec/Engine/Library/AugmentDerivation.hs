@@ -5,9 +5,9 @@
 
 module Spec.Engine.Library.AugmentDerivation (tests) where
 
-import ControlledFixpoint.Engine as Engine
-import ControlledFixpoint.Grammar
-import ControlledFixpoint.Library.AugmentDerivation as AugmentDerivation
+import Chronolog.Engine as Engine
+import Chronolog.Grammar
+import Chronolog.Library.AugmentDerivation as AugmentDerivation
 import Data.Coerce (coerce)
 import Data.Functor ((<&>))
 import Data.String (IsString (fromString))

@@ -8,8 +8,8 @@
 
 module Spec.Engine.ExprAlias (tests) where
 
-import ControlledFixpoint.Engine as Engine
-import ControlledFixpoint.Grammar as Grammar
+import Chronolog.Engine as Engine
+import Chronolog.Grammar as Grammar
 import qualified Data.Map as Map
 import Spec.Engine.Common
 import Test.Tasty (TestTree, testGroup)
