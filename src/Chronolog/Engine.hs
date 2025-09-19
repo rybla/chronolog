@@ -17,6 +17,12 @@
 
 module Chronolog.Engine where
 
+import qualified Chronolog.Common as Common
+import Chronolog.Common.Msg (Msg)
+import qualified Chronolog.Common.Msg as Msg
+import qualified Chronolog.Freshening as Freshening
+import Chronolog.Grammar
+import qualified Chronolog.Unification as Unification
 import Control.Lens ((^.))
 import Control.Monad (foldM, unless, when)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
@@ -25,12 +31,6 @@ import Control.Monad.State (StateT (..), evalStateT, execStateT, get, gets, modi
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Writer (WriterT)
 import qualified Control.Monad.Writer as Writer
-import qualified Chronolog.Common as Common
-import Chronolog.Common.Msg (Msg)
-import qualified Chronolog.Common.Msg as Msg
-import qualified Chronolog.Freshening as Freshening
-import Chronolog.Grammar
-import qualified Chronolog.Unification as Unification
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import qualified Data.List.Safe as List
@@ -388,11 +388,14 @@ loop = do
         then do
           tellMsgs
             [ (Msg.mk 1 "suspending goal")
-                { Msg.contents = ["goal =" <+> pPrint goal]
+                { Msg.contents =
+                    [ "goal (before normAliasInGoal) =" <+> pPrint goal,
+                      "goal (after normAliasInGoal)  =" <+> pPrint goal'
+                    ]
                 }
             ]
           -- TODO: what is the significance of putting the goal at the beginning or end of this list?
-          modify \env -> env {suspendedGoals = goal : env.suspendedGoals}
+          modify \env -> env {suspendedGoals = goal' : env.suspendedGoals}
         else tryRules goal
 
       loop
