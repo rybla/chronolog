@@ -12,13 +12,13 @@
 
 module Chronolog.Grammar where
 
+import Chronolog.Common.Msg (Msg)
+import qualified Chronolog.Common.Msg as Msg
 import Control.Applicative ((<|>))
 import Control.Monad (unless)
 import Control.Monad.Error.Class (MonadError (throwError))
 import Control.Monad.Writer (MonadWriter, tell)
 import Control.Newtype.Generics (Newtype, over)
-import Chronolog.Common.Msg (Msg)
-import qualified Chronolog.Common.Msg as Msg
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import qualified Data.List.Safe as List
@@ -203,7 +203,9 @@ instance (IsString v) => IsString (Expr c v) where fromString x = VarExpr (fromS
 -- Var
 --------------------------------------------------------------------------------
 
--- | Meta-variable that can be substituted with an expression
+-- | Meta-variable that can be substituted with an expression. `indexVar` must
+-- be provided manually for variables outside `Rule`s. `indexVar` will be
+-- freshened automatically for variables inside `Rule`s.
 data Var v = Var
   { labelVar :: v,
     indexVar :: Maybe Int
