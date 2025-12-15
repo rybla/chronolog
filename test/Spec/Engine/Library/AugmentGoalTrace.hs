@@ -57,7 +57,8 @@ tests =
                   [mkGoal 0 A],
                 exprAliases = [],
                 shouldSuspend = const False,
-                strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts
+                strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
+                useIndexing = True
               }
             AugmentGoalTrace.Config {},
           mkTestGroup
@@ -72,7 +73,8 @@ tests =
                   [mkHypGoal A, mkHypGoal A],
                 exprAliases = [],
                 shouldSuspend = const False,
-                strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts
+                strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
+                useIndexing = True
               }
             AugmentGoalTrace.Config {}
         ]

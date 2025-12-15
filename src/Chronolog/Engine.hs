@@ -22,6 +22,8 @@ import Chronolog.Common.Msg (Msg)
 import qualified Chronolog.Common.Msg as Msg
 import qualified Chronolog.Freshening as Freshening
 import Chronolog.Grammar
+import Chronolog.Indexing (filterPathIndexing)
+import qualified Chronolog.Indexing as Indexing
 import qualified Chronolog.Unification as Unification
 import Control.Lens ((^.))
 import Control.Monad (foldM, unless, when)
@@ -61,7 +63,8 @@ data Config a c v = Config
     goals :: [Goal a c v],
     shouldSuspend :: Goal a c v -> Bool,
     exprAliases :: [ExprAlias c v],
-    strategy :: Strategy
+    strategy :: Strategy,
+    useIndexing :: Bool
   }
 
 defaultConfig :: Config a c v
@@ -72,7 +75,8 @@ defaultConfig =
       goals = [],
       shouldSuspend = const False,
       exprAliases = [],
-      strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts
+      strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
+      useIndexing = True
     }
 
 instance (Pretty a, Pretty c, Pretty v) => Pretty (Config a c v) where
@@ -83,7 +87,8 @@ instance (Pretty a, Pretty c, Pretty v) => Pretty (Config a c v) where
         "goals =" <+> pPrint cfg.goals,
         "shouldSuspend =" <+> text "<function>",
         "exprAliases =" <+> text "<function>",
-        "strategy =" <+> pPrint cfg.strategy
+        "strategy =" <+> pPrint cfg.strategy,
+        "useIndexing =" <+> pPrint cfg.useIndexing
       ]
 
 type T a c v m =
@@ -165,6 +170,7 @@ data Env a c v = Env
   { freshCounter_vars :: Int,
     freshCounter_goals :: Int,
     rules :: [Rule a c v],
+    pathIndex :: Indexing.Trie a c v,
     activeGoals :: [Goal a c v],
     suspendedGoals :: [Goal a c v],
     failedGoals :: [Goal a c v],
@@ -293,10 +299,11 @@ mkCtx cfg =
     { config = cfg
     }
 
-mkEnv :: Config a c v -> Env a c v
+mkEnv :: (Ord a, Ord c) => Config a c v -> Env a c v
 mkEnv cfg =
   Env
     { rules = cfg.rules,
+      pathIndex = if cfg.useIndexing then Indexing.buildIndex cfg.exprAliases cfg.rules else Indexing.emptyTrie,
       activeGoals = cfg.goals,
       suspendedGoals = mempty,
       failedGoals = mempty,
@@ -308,7 +315,7 @@ mkEnv cfg =
 
 -- | To run the solver, you must use either `runConfig` or `runEnv`.
 runConfig ::
-  (Monad m, Ord v, Eq c, Pretty a, Pretty c, Pretty v, Eq a, Show a, Show c, Show v) =>
+  (Monad m, Ord a, Ord c, Ord v, Pretty a, Pretty c, Pretty v, Show a, Show c, Show v) =>
   Config a c v ->
   WriterT (Trace a c v) (Common.T m) (Either (Error, Env a c v) [Env a c v])
 runConfig cfg = do
@@ -318,7 +325,7 @@ runConfig cfg = do
 
 -- | To run the solver, you must use either `runConfig` or `runEnv`.
 runEnv ::
-  (Monad m, Ord v, Eq c, Pretty a, Pretty c, Pretty v, Eq a, Show a, Show c, Show v) =>
+  (Monad m, Ord a, Ord c, Ord v, Pretty a, Pretty c, Pretty v, Show a, Show c, Show v) =>
   Config a c v ->
   Env a c v ->
   WriterT (Trace a c v) (Common.T m) (Either (Error, Env a c v) [Env a c v])
@@ -335,7 +342,7 @@ runEnv cfg env0 = do
     Left (err, env) -> return $ Left (err, env)
     Right branches -> return $ Right branches
 
-start :: (Monad m, Ord v, Eq c, Pretty a, Pretty c, Pretty v, Eq a, Show a, Show c, Show v) => T a c v m ()
+start :: (Monad m, Ord a, Ord c, Ord v, Pretty a, Pretty c, Pretty v, Show a, Show c, Show v) => T a c v m ()
 start = do
   -- initialize trace
   tell_traceGoals =<< gets activeGoals
@@ -344,7 +351,7 @@ start = do
   -- enter loop
   loop
 
-loop :: forall a c v m. (Monad m, Ord v, Eq c, Pretty a, Pretty c, Pretty v, Eq a, Show a, Show c, Show v) => T a c v m ()
+loop :: forall a c v m. (Monad m, Ord a, Ord c, Ord v, Pretty a, Pretty c, Pretty v, Show a, Show c, Show v) => T a c v m ()
 loop = do
   ctx <- ask
 
@@ -400,12 +407,13 @@ loop = do
 
       loop
 
-tryRules :: (Monad m, Ord v, Pretty v, Pretty c, Pretty a, Eq a, Eq c, Show v, Show c, Show a) => Goal a c v -> T a c v m ()
+tryRules :: (Monad m, Ord v, Ord c, Ord a, Pretty v, Pretty c, Pretty a, Eq c, Show v, Show c, Show a) => Goal a c v -> T a c v m ()
 tryRules goal = do
   ctx <- ask
 
   rules' <-
-    gets (\env -> env.rules)
+    gets
+      (\env -> if ctx.config.useIndexing then filterPathIndexing ctx.config.exprAliases goal env.pathIndex else env.rules)
       -- freshen each rule
       >>= traverse (runFreshening . Freshening.freshenRule)
       -- apply current substitution to each rule (to update any existential variables)

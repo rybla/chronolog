@@ -34,7 +34,8 @@ mkTest a b c =
           rules = rulesAdd,
           exprAliases = [],
           goals = [mkGoal 0 $ fromIntegral a :+ fromIntegral b :== fromIntegral c],
-          shouldSuspend = const False
+          shouldSuspend = const False,
+          useIndexing = True
         }
     )
 

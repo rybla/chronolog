@@ -28,7 +28,8 @@ tests =
                 ],
               exprAliases = [],
               shouldSuspend = const False,
-              goals = [mkGoal 0 $ Atom "P" ["x"]]
+              goals = [mkGoal 0 $ Atom "P" ["x"]],
+              useIndexing = True
             }
         )
         (EngineSuccessWithSolutionsCount 2)

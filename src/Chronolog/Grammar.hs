@@ -302,13 +302,13 @@ applyExprAlias aliases e = foldr (\(ExprAlias f) -> (f e <|>)) Nothing aliases
 
 normAliasesInGoal :: (MonadWriter [Msg] m) => [ExprAlias c v] -> Goal a c v -> m (Goal a c v)
 normAliasesInGoal exprAliases goal = do
-  atom <- normAliasesInAtom exprAliases goal.atom
+  let atom = normAliasesInAtom exprAliases goal.atom
   return goal {atom}
 
-normAliasesInAtom :: (MonadWriter [Msg] m) => [ExprAlias c v] -> Atom a c v -> m (Atom a c v)
-normAliasesInAtom exprAliases (Atom a es) = Atom a <$> traverse (normAliasesInExpr exprAliases) es
+normAliasesInAtom :: [ExprAlias c v] -> Atom a c v -> Atom a c v
+normAliasesInAtom exprAliases (Atom a es) = Atom a $ map (normAliasesInExpr exprAliases) es
 
-normAliasesInExpr :: forall c v m. (MonadWriter [Msg] m) => [ExprAlias c v] -> Expr c v -> m (Expr c v)
+normAliasesInExpr :: forall c v. [ExprAlias c v] -> Expr c v -> Expr c v
 normAliasesInExpr exprAliases e0 = do
   let -- unfolds an alias in the left-most position, if any
       go :: Expr c v -> Maybe (Expr c v)
@@ -322,7 +322,7 @@ normAliasesInExpr exprAliases e0 = do
                 go' _ [] = Nothing
                 go' es_before (e_i : es_after) = (mappend es_before <$> ((:) <$> go e_i <*> return es_after)) <|> go' (es_before <> [e_i]) es_after
   case go e0 of
-    Nothing -> return e0
+    Nothing -> e0
     Just e' -> normAliasesInExpr exprAliases e'
 
 normHeadAliasesInExpr :: forall c v m. (MonadWriter [Msg] m, Pretty c, Pretty v) => [ExprAlias c v] -> Expr c v -> m (Expr c v)

@@ -31,6 +31,7 @@ library
       Chronolog.Freshening
       Chronolog.Grammar
       Chronolog.Html
+      Chronolog.Indexing
       Chronolog.Library.AugmentDerivation
       Chronolog.Library.AugmentGoalTrace
       Chronolog.Unification
@@ -63,6 +64,7 @@ library
     , singletons-th
     , text
     , transformers
+    , vector
   default-language: Haskell2010
 
 executable chronolog-exe
@@ -98,6 +100,7 @@ executable chronolog-exe
     , singletons-th
     , text
     , transformers
+    , vector
   default-language: Haskell2010
 
 test-suite chronolog-test
@@ -115,6 +118,7 @@ test-suite chronolog-test
       Spec.Engine.Library.AugmentDerivation
       Spec.Engine.Library.AugmentGoalTrace
       Spec.Engine.Library.Common
+      Spec.Engine.PathIndexing
       Spec.Engine.Proof
       Spec.Engine.PruneAtRequiredGoalFailure
       Spec.Engine.RuleSpecificSuspend
@@ -154,4 +158,5 @@ test-suite chronolog-test
     , tasty-hunit
     , text
     , transformers
+    , vector
   default-language: Haskell2010

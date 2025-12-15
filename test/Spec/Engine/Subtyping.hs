@@ -44,7 +44,9 @@ mkTest a b =
           goals = [mkGoal 0 $ a :<: b],
           shouldSuspend = \case
             Goal {atom = VarExpr _ :<: VarExpr _} -> True
-            _ -> False
+            _ -> False,
+          useIndexing = True
+
         }
     )
 

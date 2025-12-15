@@ -85,7 +85,7 @@ instance (Pretty c, Pretty v) => Pretty (EngineResult c v) where
   pPrint (EngineSuccessWithSolutionsCount n) = "success with" <+> pPrint n <+> "solutions"
   pPrint (EngineSuccessWithSubst _) = "success with subst"
 
-mkTest_Engine_visualization :: forall a c v. (Pretty a, Eq a, Show a, Pretty c, Pretty v, Ord v, Eq c, Show c, Show v) => TestName -> String -> Engine.Config a c v -> TestTree
+mkTest_Engine_visualization :: forall a c v. (Pretty a, Ord a, Show a, Pretty c, Pretty v, Ord v, Ord c, Show c, Show v) => TestName -> String -> Engine.Config a c v -> TestTree
 mkTest_Engine_visualization testName fileName cfg = goldenVsString testName ("html" </> fileName) do
   (err_or_envs, _msgs) <-
     Engine.runConfig cfg
@@ -99,7 +99,7 @@ mkTest_Engine_visualization testName fileName cfg = goldenVsString testName ("ht
 
   return . fromString . render . renderHtml "style.css" $ content
 
-mkTest_Engine :: forall a c v. (Pretty a, Eq a, Show a, Pretty c, Pretty v, Ord v, Eq c, Show c, Show v) => TestName -> Engine.Config a c v -> EngineResult c v -> TestTree
+mkTest_Engine :: forall a c v. (Pretty a, Ord a, Show a, Pretty c, Pretty v, Ord v, Ord c, Show c, Show v) => TestName -> Engine.Config a c v -> EngineResult c v -> TestTree
 mkTest_Engine testName cfg result_expected = testCase (render (text testName <+> brackets (pPrint result_expected))) do
   (err_or_envs, msgs) <-
     Engine.runConfig cfg
