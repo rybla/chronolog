@@ -66,7 +66,8 @@ ex1_tests =
                 Swap (Tuple x y) -> Just $ Tuple y x
                 _ -> Nothing
             ],
-          strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts
+          strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
+          useIndexing = True
         }
 
 pattern A :: Expr C V

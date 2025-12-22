@@ -89,7 +89,8 @@ tests_Norm_v1 =
             shouldSuspend = \case
               Goal {atom = Valid (VarExpr _ :⇓ VarExpr _) _} -> True
               _ -> False,
-            initialGas = FiniteGas 50
+            initialGas = FiniteGas 50,
+            useIndexing = True
           }
 
     rules_v1 :: [Rule A C V]

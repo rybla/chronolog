@@ -44,7 +44,8 @@ tests =
               ],
             shouldSuspend = const False,
             exprAliases = [],
-            strategy = Engine.DepthFirstStrategy Engine.defaultDepthFirstStrategyOpts
+            strategy = Engine.DepthFirstStrategy Engine.defaultDepthFirstStrategyOpts,
+            useIndexing = True
           }
         Common.EngineFailure,
       mkTest_Engine @A @C @V
@@ -63,7 +64,8 @@ tests =
               ],
             shouldSuspend = const False,
             exprAliases = [],
-            strategy = Engine.DepthFirstStrategy Engine.defaultDepthFirstStrategyOpts
+            strategy = Engine.DepthFirstStrategy Engine.defaultDepthFirstStrategyOpts,
+            useIndexing = True
           }
         (Common.EngineError Engine.OutOfGas)
     ]

@@ -35,6 +35,7 @@ dependencies:
   - array
   - text
   - containers
+  - vector
   - parallel
   - list-t
   - pretty
