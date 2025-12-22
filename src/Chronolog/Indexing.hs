@@ -1,13 +1,11 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE NamedFieldPuns #-}
-{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
 module Chronolog.Indexing where
 
-import Chronolog.Grammar
+import Chronolog.Grammar as G
 import Control.Monad.State (MonadState (put), evalState, get)
 import qualified Data.List as List
 import Data.Map (Map)
@@ -15,7 +13,7 @@ import qualified Data.Map as Map
 import qualified Data.Maybe
 import qualified Data.Set as Set
 import qualified Data.Vector as Vector
-import Text.PrettyPrint.HughesPJClass (brackets, doubleQuotes, hcat, nest, punctuate, render, text, vcat, ($$), (<+>), (<>))
+import Text.PrettyPrint.HughesPJClass (brackets, doubleQuotes, hcat, hsep, nest, punctuate, render, text, vcat, (<+>), (<>))
 import Prelude hiding ((<>))
 
 -- Implementation of path indexing based on Chapter 26 of Volume 2 of the Handbook of Automated Reasoning
@@ -32,40 +30,35 @@ data PathStringPart a c v = Pos Int | At a | Co c | Va
 type PathString a c v = [PathStringPart a c v]
 
 genPathStrings :: Rule a c v -> [PathString a c v]
-genPathStrings (Rule _ _ conc _) = atomToPathStrings conc
+genPathStrings (Rule _ _ c _) = atomToPathStrings c
 
 atomToPathStrings :: Atom a c v -> [PathString a c v]
-atomToPathStrings (Atom name args) = map (At name :) $ argsToPathStrings 0 args
+atomToPathStrings (Atom n es) = map (At n :) $ argsToPathStrings 0 es
 
 argsToPathStrings :: Int -> [Expr c v] -> [PathString a c v]
-argsToPathStrings pos (x : xs) = (map (Pos pos :) (exprToPathStrings x)) ++ argsToPathStrings (succ pos) xs
+argsToPathStrings pos (x : xs) = map (Pos pos :) (exprToPathStrings x) ++ argsToPathStrings (succ pos) xs
 argsToPathStrings 0 [] = [[]]
 argsToPathStrings _ [] = []
 
 exprToPathStrings :: Expr c v -> [PathString a c v]
-exprToPathStrings (ConExpr (Con con args)) = map (Co con :) (argsToPathStrings 0 args)
+exprToPathStrings (ConExpr (Con c es)) = map (Co c :) (argsToPathStrings 0 es)
 exprToPathStrings (VarExpr (Var _ _)) = [[Va]]
 
 --------------------------------------------------------------------------------
 -- OrderedRule
 --------------------------------------------------------------------------------
 
-newtype OrderedRule a c v = Wrap (Rule a c v)
+newtype OrderedRule a c v = WrapOrderedRule (Rule a c v)
 
 -- Not sure if name-based ordering is acceptable
 instance Eq (OrderedRule a c v) where
-  (==) r1 r2 =
-    let Wrap (Rule (RuleName name1) _ _ _) = r1
-        Wrap (Rule (RuleName name2) _ _ _) = r2
-     in name1 == name2
+  WrapOrderedRule r1 == WrapOrderedRule r2 = r1.name == r2.name
+
 instance Ord (OrderedRule a c v) where
-  (<=) r1 r2 =
-    let Wrap (Rule (RuleName name1) _ _ _) = r1
-        Wrap (Rule (RuleName name2) _ _ _) = r2
-     in name1 <= name2
+  WrapOrderedRule r1 <= WrapOrderedRule r2 = r1.name <= r2.name
 
 unwrapOrderedRule :: OrderedRule a c v -> Rule a c v
-unwrapOrderedRule (Wrap r) = r
+unwrapOrderedRule (WrapOrderedRule r) = r
 
 --------------------------------------------------------------------------------
 -- TrieSet
@@ -78,11 +71,10 @@ trieSetEmpty :: TrieSet a c v
 trieSetEmpty = Set.empty
 
 trieSetInsert :: TrieSet a c v -> Rule a c v -> TrieSet a c v
-trieSetInsert set rule =
-  Set.insert (Wrap rule) set
+trieSetInsert set rule = Set.insert (WrapOrderedRule rule) set
 
 trieSetSingleton :: Rule a c v -> TrieSet a c v
-trieSetSingleton rule = Set.singleton (Wrap rule)
+trieSetSingleton rule = Set.singleton (WrapOrderedRule rule)
 
 -- A similar function is included in containers >= 0.8 as Set.intersections
 setIntersections :: (Ord a) => [Set.Set a] -> Set.Set a
@@ -93,15 +85,14 @@ setIntersections l = foldr1 Set.intersection l
 -- Trie
 --------------------------------------------------------------------------------
 
-{- | Trie made up of maps from path string parts to children.
-`Leaf` should only be mapped to by `Nothing`
--}
+-- | Trie made up of maps from path string parts to children.
+-- `Leaf` should only be mapped to by `Nothing`
 data Trie a c v
   = Node (Map (Maybe (PathStringPart a c v)) (Trie a c v))
   | Leaf (TrieSet a c v)
 
 emptyTrie :: Trie a c v
-emptyTrie = Leaf (trieSetEmpty)
+emptyTrie = Leaf trieSetEmpty
 
 newTrie :: Rule a c v -> PathString a c v -> Trie a c v
 newTrie rule [] = Node (Map.singleton Nothing (Leaf (trieSetSingleton rule)))
@@ -117,26 +108,22 @@ trieType (Node _) = "node"
 
 -- | Goal preprocessed to allow faster (and cleaner) random access via path strings
 data FastGoal a c v = FastGoal
-  { atom :: a
-  , exprs :: Vector.Vector (FastGoalExpr c)
+  { atom :: a,
+    exprs :: Vector.Vector (FastGoalExpr c)
   }
 
 data FastGoalExpr c = GoalCon c (Vector.Vector (FastGoalExpr c)) | GoalVar
 
 preProcessGoal :: [ExprAlias c v] -> Goal a c v -> FastGoal a c v
 preProcessGoal aliases goal =
-  let Goal atom _ _ = goal
-      (Atom a args) = normAliasesInAtom aliases atom
-      go exprs =
-        Vector.fromList $
-          map
-            ( \expr ->
-                case expr of
-                  ConExpr (Con con con_args) -> GoalCon con (go con_args)
-                  VarExpr (Var _ _) -> GoalVar
-            )
-            exprs
-   in FastGoal a (go args)
+  let Atom an es = normAliasesInAtom aliases (G.atom goal)
+      go =
+        Vector.fromList
+          . map
+            \case
+              ConExpr (Con con con_args) -> GoalCon con (go con_args)
+              VarExpr (Var _ _) -> GoalVar
+   in FastGoal an (go es)
 
 --------------------------------------------------------------------------------
 -- Functions
@@ -156,21 +143,22 @@ insertPathString rule (part : rest) (Node children) = Node $
 insertPathString rule [] (Node children) =
   Node $
     Map.insertWith newLeaf Nothing (Leaf (trieSetSingleton rule)) children
- where
-  newLeaf _ (Leaf s) = Leaf $ trieSetInsert s rule
-  -- unreachable for well-formed tries: Nothing should never map to a Node
-  newLeaf singleton (Node _) = singleton
+  where
+    newLeaf _ (Leaf s) = Leaf $ trieSetInsert s rule
+    -- unreachable for well-formed tries: Nothing should never map to a Node
+    newLeaf singleton (Node _) = singleton
 -- Should only happen at initial Trie construction
 insertPathString rule path@(_ : _) (Leaf _) = newTrie rule path
 
 {-# SCC buildIndex #-}
 buildIndex :: forall a c v s. (Ord a, Ord c, Foldable s) => [ExprAlias c v] -> s (Rule a c v) -> Trie a c v
-buildIndex aliases rules =
-  Prelude.foldr go (Leaf trieSetEmpty) rules
-    where go rule trie = let Rule _ _ conc _ = rule
-                             normedConc = normAliasesInAtom aliases conc
-                             normedRule = rule{ conc = normedConc }
-                          in trieInsert normedRule trie
+buildIndex aliases = foldr go (Leaf trieSetEmpty)
+  where
+    go rule trie =
+      let Rule _ _ c _ = rule
+          normedConc = normAliasesInAtom aliases c
+          normedRule = rule {conc = normedConc}
+       in trieInsert normedRule trie
 
 {-# SCC filterPathIndexing #-}
 filterPathIndexing :: (Ord a, Ord c) => [ExprAlias c v] -> Goal a c v -> Trie a c v -> [Rule a c v]
@@ -226,24 +214,24 @@ filterPathIndexing aliases goal trie =
         Node m -> case Map.lookup (Just $ At fastGoal.atom) m of
           Nothing -> []
           -- unreachable for well-formed tries
-          Just (Leaf _) -> [] 
+          Just (Leaf _) -> []
           Just (Node children) ->
             map unwrapOrderedRule $
               Set.toList $
-              if Vector.length fastGoal.exprs == 0 then
-                case Map.lookup Nothing children of
-                Just (Leaf compatible) -> compatible
-                _ -> Set.empty
-                else
-                  setIntersections $
-                    List.map
-                      ( \i -> case Map.lookup (Just $ Pos i) children of
-                          Just n@(Node _) -> retrieve n (fastGoal.exprs Vector.! i)
-                          Nothing -> Set.empty
-                          -- unreachable for well-formed tries
-                          Just (Leaf _) -> Set.empty
-                      )
-                      [0 .. (Vector.length fastGoal.exprs - 1)]
+                if Vector.length fastGoal.exprs == 0
+                  then case Map.lookup Nothing children of
+                    Just (Leaf compatible) -> compatible
+                    _ -> Set.empty
+                  else
+                    setIntersections $
+                      List.map
+                        ( \i -> case Map.lookup (Just $ Pos i) children of
+                            Just n@(Node _) -> retrieve n (fastGoal.exprs Vector.! i)
+                            Nothing -> Set.empty
+                            -- unreachable for well-formed tries
+                            Just (Leaf _) -> Set.empty
+                        )
+                        [0 .. (Vector.length fastGoal.exprs - 1)]
 
 -- | Generates a tree representation to be rendered by Graphviz dot
 genGraphviz :: (Show a, Show c) => Trie a c v -> String
@@ -254,22 +242,22 @@ genGraphviz trie =
         return i
       getRels (Leaf compat) = do
         i <- getNext
-        let showOrderedRule (Wrap (Rule (RuleName name) _ _ _)) = name
-        let escapeQuotes "" = ""
+        let showOrderedRule :: OrderedRule a c v -> String
+            showOrderedRule = unRuleName . (\r -> r.name) . unwrapOrderedRule
+
+            escapeQuotes "" = ""
             escapeQuotes ('\"' : cs) = "\\\"" ++ escapeQuotes cs
             escapeQuotes (c : cs) = c : escapeQuotes cs
-        let label = hcat $ punctuate (text ", ") $ map (text . escapeQuotes . showOrderedRule) $ Set.toList compat
-        let leafNode =
-              ( (text . show $ i)
-                  <+> ( brackets $
-                          hcat $
-                            punctuate
-                              (text ",")
-                              [ text "label=" <> (doubleQuotes label)
-                              , text "peripheries=2"
-                              ]
-                      )
-              )
+            label = hcat $ punctuate (text ", ") $ map (text . escapeQuotes . showOrderedRule) $ Set.toList compat
+
+            leafNode =
+              hsep
+                [ text . show $ i,
+                  brackets . hcat . punctuate (text ",") $
+                    [ text "label=" <> doubleQuotes label,
+                      text "peripheries=2"
+                    ]
+                ]
                 <> text ";"
         return ([leafNode], [])
       getRels (Node m) = do
@@ -283,28 +271,25 @@ genGraphviz trie =
                 let tr = case p of
                       Nothing -> ((text . show) parent <+> text "->" <+> (text . show) i) <> text ";"
                       Just part ->
-                        ( (text . show) parent
-                            <+> text "->"
-                            <+> (text . show) i
-                            <+> ( brackets $
-                                    hcat $
-                                      punctuate
-                                        (text ",")
-                                        [ text "label=" <> (doubleQuotes $ text (filter (/= '"') $ show part))
-                                        ]
-                                )
-                        )
+                        hsep
+                          [ text . show $ parent,
+                            text "->",
+                            text . show $ i,
+                            brackets . hcat . punctuate (text ",") $
+                              [text "label=" <> doubleQuotes (text (filter (/= '"') $ show part))]
+                          ]
                           <> text ";"
                 return (childNodes, tr : childTrans)
             )
             (Map.toList m)
         return $ foldr (\(ns, trs) (accNodes, accTrs) -> (accNodes ++ ns, accTrs ++ trs)) ([node], []) mt
       (nodes, rels) = evalState (getRels trie) (0 :: Integer)
-   in render $
-        text "digraph Trie {"
-          $$ ( nest
-                 4
-                 $ vcat
-                   (nodes ++ rels)
-             )
-          $$ text "}"
+   in render . vcat $
+        [ text "digraph Trie {",
+          nest
+            4
+            ( vcat
+                (nodes ++ rels)
+            ),
+          text "}"
+        ]

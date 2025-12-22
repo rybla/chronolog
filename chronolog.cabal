@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.38.0.
+-- This file has been generated from package.yaml by hpack version 0.38.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -115,10 +115,10 @@ test-suite chronolog-test
       Spec.Engine.CutRule
       Spec.Engine.ExistentialVariables
       Spec.Engine.ExprAlias
+      Spec.Engine.Indexing
       Spec.Engine.Library.AugmentDerivation
       Spec.Engine.Library.AugmentGoalTrace
       Spec.Engine.Library.Common
-      Spec.Engine.PathIndexing
       Spec.Engine.Proof
       Spec.Engine.PruneAtRequiredGoalFailure
       Spec.Engine.RuleSpecificSuspend

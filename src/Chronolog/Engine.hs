@@ -407,7 +407,7 @@ loop = do
 
       loop
 
-tryRules :: (Monad m, Ord v, Ord c, Ord a, Pretty v, Pretty c, Pretty a, Eq c, Show v, Show c, Show a) => Goal a c v -> T a c v m ()
+tryRules :: (Monad m, Ord v, Ord c, Ord a, Pretty v, Pretty c, Pretty a, Show v, Show c, Show a) => Goal a c v -> T a c v m ()
 tryRules goal = do
   ctx <- ask
 
