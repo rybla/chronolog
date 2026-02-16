@@ -615,14 +615,24 @@ tryRule goal rule = do
 
           -- for each suspended goal that was refined by sigma_uni, make it active again
           suspendedGoals_curr <- gets suspendedGoals
-          (activeGoals_resumed, suspendedGoals_new) <-
+
+          (activeGoals_resumed, suspendedGoals_new) <- do
+            env <- get
             zip suspendedGoals_old suspendedGoals_curr
               & foldM
-                ( \(activeGoals_resumed, suspendedGoals_new) (suspendedGoal_old, suspendedGoal_curr) ->
+                ( \(activeGoals_resumed, suspendedGoals_new) (suspendedGoal_old, suspendedGoal_curr) -> do
                     case suspendedGoal_old == suspendedGoal_curr of
+                      -- if the suspended goal was NOT refined by the substitution, then leave it suspended
                       True -> do
-                        -- if the suspended goal was NOT refined by the substitution, then leave it suspended
-                        return (activeGoals_resumed, suspendedGoal_old : suspendedGoals_new)
+                        return (activeGoals_resumed, suspendedGoal_curr : suspendedGoals_new)
+                      -- if the suspended goal was refined by the substitution, but ALL of the rules in its constrained ruleset would just suspend it again, then don't resume it
+                      False
+                        | Just rns <- suspendedGoal_curr.goalOpts.constrainedRulesetGoalOpt,
+                          env.rules
+                            & filter (\r -> r.name `elem` rns)
+                            & all (\r -> r.ruleOpts.suspendRuleOpt & maybe False (\p -> p suspendedGoal_curr)) ->
+                            return (activeGoals_resumed, suspendedGoal_curr : suspendedGoals_new)
+                      -- if the suspended goal was refined by the substitution, then resume it
                       False -> do
                         tell_traceStep
                           ResumeStep

@@ -5,7 +5,7 @@ cabal-version: 2.2
 -- see: https://github.com/sol/hpack
 
 name:           chronolog
-version:        0.1.0.0
+version:        0.1.1.0
 description:    Please see the README on GitHub at <https://github.com/rybla/chronolog#readme>
 homepage:       https://github.com/rybla/chronolog#readme
 bug-reports:    https://github.com/rybla/chronolog/issues
