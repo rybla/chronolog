@@ -619,11 +619,11 @@ tryRule goal rule = do
             zip suspendedGoals_old suspendedGoals_curr
               & foldM
                 ( \(activeGoals_resumed, suspendedGoals_new) (suspendedGoal_old, suspendedGoal_curr) ->
-                    if suspendedGoal_old == suspendedGoal_curr
-                      then
+                    case suspendedGoal_old == suspendedGoal_curr of
+                      True -> do
                         -- if the suspended goal was NOT refined by the substitution, then leave it suspended
                         return (activeGoals_resumed, suspendedGoal_old : suspendedGoals_new)
-                      else do
+                      False -> do
                         tell_traceStep
                           ResumeStep
                             { goal = suspendedGoal_curr,
