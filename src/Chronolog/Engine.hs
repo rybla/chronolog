@@ -625,26 +625,24 @@ tryRule goal rule = do
                       -- if the suspended goal was NOT refined by the substitution, then leave it suspended
                       True -> do
                         return (activeGoals_resumed, suspendedGoal_curr : suspendedGoals_new)
-                      -- if the suspended goal was refined by the substitution, but ALL of the rules in its constrained ruleset would just suspend it again, then don't resume it
                       False
+                        -- if the suspended goal was refined by the substitution, but ALL of the rules in its constrained ruleset would just suspend it again, then don't resume it
                         | Just rns <- suspendedGoal_curr.goalOpts.constrainedRulesetGoalOpt,
-                          env.rules
-                            & filter (\r -> r.name `elem` rns)
-                            & all (\r -> r.ruleOpts.suspendRuleOpt & maybe False (\p -> p suspendedGoal_curr)) ->
+                          env.rules & all \r -> r.name `notElem` rns || (r.ruleOpts.suspendRuleOpt & maybe False ($ suspendedGoal_curr)) ->
                             return (activeGoals_resumed, suspendedGoal_curr : suspendedGoals_new)
-                      -- if the suspended goal was refined by the substitution, then resume it
-                      False -> do
-                        tell_traceStep
-                          ResumeStep
-                            { goal = suspendedGoal_curr,
-                              reason = "the suspended goal was refined by a new substitution:" <+> pPrint sigma_uni
-                            }
-                        tellMsgs
-                          [ (Msg.mk 2 "resume goal")
-                              { Msg.contents = [pPrint suspendedGoal_curr]
-                              }
-                          ]
-                        return (suspendedGoal_curr : activeGoals_resumed, suspendedGoals_new)
+                        -- if the suspended goal was refined by the substitution, and SOME rule in its constrained ruleset can apply, then resume it
+                        | otherwise -> do
+                            tell_traceStep
+                              ResumeStep
+                                { goal = suspendedGoal_curr,
+                                  reason = "the suspended goal was refined by a new substitution:" <+> pPrint sigma_uni
+                                }
+                            tellMsgs
+                              [ (Msg.mk 2 "resume goal")
+                                  { Msg.contents = [pPrint suspendedGoal_curr]
+                                  }
+                              ]
+                            return (suspendedGoal_curr : activeGoals_resumed, suspendedGoals_new)
                 )
                 ([], [])
           modify \env ->
