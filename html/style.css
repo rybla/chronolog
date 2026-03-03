@@ -1,225 +1,439 @@
 /*
-  This CSS file applies a "digital brutalism" design to the corresponding HTML file.
-  The design is characterized by high contrast, hard block shadows, sharp corners,
-  and a raw, structured feel, all while being light-mode friendly.
+================================================================================
+DIGITAL NEO-BRUTALISM DESIGN SYSTEM BLUEPRINT (REVISION 4)
+================================================================================
 
-  ORGANIZATION:
-  1.  `@font-face` and `body`: Sets the global font (VT323 for a retro, stark feel)
-      and basic page styles.
-  2.  Layout & Hierarchy (`Trace`, `TraceNode`, `TraceStep`, `substeps`): These rules
-      establish the main structure. `TraceNode`s are given borders and margins to
-      separate them, and nested nodes within `substeps` are indented to show hierarchy.
-  3.  Core Components (`Goal`, `failed`, `solved`, `rule`, `sigma`): These are the main
-      content blocks within a `TraceStep`. They are styled with borders and hard
-      shadows to make them stand out as distinct units. `failed` and `solved`
-      are color-coded for clarity.
-  4.  "Building Blocks" (`Con`, `Var`): This section addresses the specific requirement
-      to make `Con` and `Var` elements look like they fit together. They are styled
-      as inline-flex containers with borders. The adjacent sibling selector (`+`) is
-      used to remove the left border of a block when it follows another, creating a
-      seamless, connected look.
-  5.  Labels & Names (`AtomName`, `ConName`, `RuleName`): These are styled as headers
-      for their respective blocks, with a distinct background and padding.
-  6.  Atoms & Data (`Atom`, `Subst`, `SubstItem`): These rules format the data-heavy
-      parts of the trace, ensuring alignment and readability.
-  7.  Tags & Indexes (`GoalIndex`, `VarIndex`, `GoalOpt`): These smaller elements
-      are styled to look like tags or labels, with unique backgrounds and padding
-      to differentiate them from the main content.
+This CSS file implements the Digital Neo-Brutalism design system, revised to
+enhance clarity, contrast, and visual hierarchy for a tree-like data structure.
+The core philosophy remains, but the application is now more focused on
+representing nested relationships and creating a compact, information-dense
+layout.
+
+--------------------------------------------------------------------------------
+REVISION HIGHLIGHTS:
+--------------------------------------------------------------------------------
+
+1.  **Enhanced Contrast & Clarity**: The color palette has been adjusted for
+    higher contrast. The primary background is now pure white, and neutral grays
+    are used more deliberately to define structure without reducing readability.
+
+2.  **Explicit Nesting**: The visual representation of the tree structure is
+    now a primary focus. Indentation is more pronounced, and nested containers
+    receive distinct background colors and borders to make their depth in the
+    hierarchy immediately obvious. The dotted lines have been replaced with
+    solid lines for a stronger structural feel.
+
+3.  **Concise & Compact Layout**: Spacing values (padding and margins) have
+    been reduced across all components. This creates a denser layout, allowing
+    more information to be visible on the screen at once, which is critical
+    for navigating a complex proof tree.
+
+4.  **Strengthened Structure**: Elements like `.TraceNode` now use a thick,
+    solid border instead of a shadow, reinforcing the "honesty of material"
+    principle by making the container's boundary a core part of its visual
+    identity rather than an effect.
+
+5.  **Goal Notes**: Added styles for the `.note` component, which can appear
+    inside a `.goal`. These notes use functional colors (`.possible`,
+    `.impossible`) to provide at-a-glance information about the goal's state.
+
+6.  **Conditional Node Highlighting**: A `.TraceNode` containing a `.note.possible`
+    will now have its background changed to the success color, providing a
+    clear, high-level visual indicator for successful branches of the proof tree.
+    Child element colors are adjusted for readability against this new background.
+
+--------------------------------------------------------------------------------
+FILE ORGANIZATION:
+--------------------------------------------------------------------------------
+
+1.  **:root**: Global variables are updated for the new compact layout and
+    high-contrast color scheme.
+
+2.  **BASE STYLES**: Body styles are updated for the new background.
+
+3.  **LAYOUT & STRUCTURE**: This section is significantly revised. The styles
+    for `.steps` and `.substeps` now create a much clearer and more rigid
+    tree-like structure.
+
+4.  **COMPONENT STYLES**: Styles for components like `.Con` now include rules
+    for nested versions, creating a "scoping" effect with background colors
+    that visually communicates depth. This section now includes styles for
+    `.goal` and its associated `.note`.
+
+5.  **STATE & INTERACTION STYLES**: These remain functionally the same but are
+    now applied to the new, more compact component designs. The new conditional
+    highlighting for `.TraceNode` is included here.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+:root {
+  /* Primary Palette (Neutrals) */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-light-gray: #e0e0e0;
+  --color-mid-gray: #666666;
+  --color-background: #ffffff; /* Changed to white for max contrast */
 
-body {
-  background-color: #f0f0f0;
-  color: #000000;
-  font-family: 'VT323', monospace;
-  font-size: 18px;
-  line-height: 1.5;
-  margin: 0;
-  padding: 20px;
+  /* Accent Palette (Functional) */
+  --color-action-blue: #007aff;
+  --color-destructive-red: #ff3b30;
+  --color-success-green: #34c759;
+  --color-warning-orange: #ff9500;
+  --color-highlight-purple: #af52de;
+  --color-attention-yellow: #ffcc00;
+
+  /* Typography */
+  --font-primary: "Inter", "Helvetica", "Arial", sans-serif;
+  --font-monospace: "IBM Plex Mono", "Courier New", monospace;
+  --font-size-base: 14px; /* Slightly smaller base font for density */
+
+  /* Spacing (Compact Grid System) */
+  --space-xs: 4px;
+  --space-sm: 6px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --indent-size: 24px;
+
+  /* Borders */
+  --border-width-sm: 1px;
+  --border-width-md: 2px;
+  --border-radius: 0;
+  --border-standard: var(--border-width-md) solid var(--color-black);
+  --border-light: var(--border-width-sm) solid var(--color-light-gray);
+
+  /* Shadows */
+  --shadow-hard: 4px 4px 0px var(--color-black);
+  --shadow-none: 0 0 0 var(--color-black);
 }
 
-/* --- Layout & Hierarchy --- */
+/* Base Styles */
+body {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  background-color: var(--color-background);
+  color: var(--color-black);
+  margin: 0;
+  padding: var(--space-lg);
+}
+
+/* Layout & Structure */
 .Trace {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-lg);
 }
 
 .TraceNode {
-  border: 2px solid #000000;
-  background-color: #ffffff;
+  background-color: var(--color-white);
+  border: var(--border-standard);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.steps,
+.substeps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-left: var(--space-md);
+  padding-left: var(--indent-size);
+  border-left: var(--border-width-md) solid var(--color-black);
 }
 
 .TraceStep {
-  display: grid;
-  grid-template-areas:
-    "goal goal"
-    "rule sigma"
-    "substeps substeps";
-  grid-template-columns: 1fr 1fr;
-}
-
-.substeps {
-  grid-area: substeps;
-  padding: 10px 10px 10px 30px; /* Indent nested steps */
+  border: var(--border-light);
+  padding: var(--space-sm);
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  border-top: 2px solid #000000;
+  gap: var(--space-sm);
 }
 
-/* --- Core Components --- */
-.goal {
-  grid-area: goal;
-}
-
-.Goal,
-.failed {
-  padding: 10px;
-  border-bottom: 2px solid #000000;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.failed {
-  background-color: #ffcccc;
-  color: #a80000;
-  box-shadow: 8px 8px 0px #d9adad;
-}
-
-.solved {
-  grid-area: substeps; /* In the HTML, solved replaces substeps */
-  padding: 10px;
-  background-color: #ccffcc;
-  color: #006400;
+/* Component Styles */
+.status {
+  border: var(--border-standard);
+  padding: var(--space-sm) var(--space-md);
+  font-weight: bold;
   text-align: center;
-  font-size: 1.2em;
-  border-top: 2px solid #000000;
-  box-shadow: inset 4px 4px 0px #a3cca3;
+}
+
+.status.processing {
+  background-color: var(--color-attention-yellow);
+}
+
+.status.failed {
+  background-color: var(--color-destructive-red);
+  color: var(--color-white);
+}
+
+.status.solved {
+  background-color: var(--color-success-green);
+  color: var(--color-white);
+}
+
+.status.abandoned {
+  background-color: #d1e7fd;
+  border: 1px solid #a6cafa;
+  color: #0c5460;
+  padding: 3px 5px;
+  border-radius: 3px;
+  margin: 2px 0;
+}
+
+.message {
+  font-size: 1.1em;
+}
+
+.goal {
+  background-color: var(--color-white);
+  padding: var(--space-sm);
+  border: var(--border-width-md) solid var(--color-black);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.note {
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-width-md) solid var(--color-black);
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.note.possible {
+  background-color: var(--color-success-green);
+  color: var(--color-white);
+}
+
+.note.impossible {
+  background-color: var(--color-destructive-red);
+  color: var(--color-black);
+}
+
+.Goal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.goalIndex,
+.GoalIndex {
+  font-family: var(--font-monospace);
+  font-weight: bold;
+  color: var(--color-action-blue);
+  background-color: #f0f0f0;
+  padding: 2px 4px;
+  border: var(--border-light);
+  align-self: flex-start;
+}
+
+.atom,
+.Atom {
+  padding: var(--space-sm);
+  border: var(--border-light);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.AtomName {
+  font-weight: bold;
+  color: var(--color-white);
+  background-color: var(--color-highlight-purple);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.Con {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  border: var(--border-width-sm) solid #dcdcdc;
+  background-color: #f7f7f7;
+}
+
+/* Clearer nesting for .Con elements */
+.Con .Con {
+  background-color: #ededed;
+  border-color: #cccccc;
+}
+
+.Con .Con .Con {
+  background-color: #e3e3e3;
+  border-color: #bbbbbb;
+}
+
+.Con .Con .Con .Con {
+  background-color: #d9d9d9;
+  border-color: #acacac;
+}
+
+.ConName {
+  font-family: var(--font-monospace);
+  color: var(--color-action-blue);
+  font-weight: 500;
+}
+
+.Var {
+  font-family: var(--font-monospace);
+  color: var(--color-destructive-red);
+  font-style: italic;
+  display: flex;
+  flex-direction: column;
+}
+
+.VarFreshIndex {
+  font-size: 0.8em;
+  color: var(--color-mid-gray);
+  margin-left: -2px;
+  vertical-align: sub;
+}
+
+.options,
+.GoalOpts,
+.RuleOpts {
+  font-family: var(--font-monospace);
+  color: var(--color-mid-gray);
+  font-size: 0.9em;
+  padding: var(--space-xs);
+  background-color: #f0f0f0;
+}
+
+.label {
+  font-weight: bold;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  padding: var(--space-xs) var(--space-sm);
+  align-self: flex-start;
+}
+
+.applyRule .label {
+  background-color: var(--color-action-blue);
+}
+
+.failure .label {
+  background-color: var(--color-destructive-red);
 }
 
 .rule {
-  grid-area: rule;
-  padding: 10px;
-  border-right: 2px solid #000000;
-}
-
-.sigma {
-  grid-area: sigma;
-  padding: 10px;
-}
-
-/* --- Building Blocks --- */
-.Con,
-.Var {
-  display: inline-flex;
-  align-items: center;
-  border: 2px solid #000000;
-  background-color: #e0e0e0;
-  box-shadow: 4px 4px 0px #aaaaaa;
-  margin: 2px;
-}
-
-/* Make blocks fit together */
-.Con + .Con,
-.Con + .Var,
-.Var + .Con,
-.Var + .Var {
-  border-left: none;
-  margin-left: 0;
-  box-shadow: 4px 4px 0px #aaaaaa; /* Keep shadow consistent */
-}
-
-.Var {
-  background-color: #d1eaff;
-  padding: 0 8px;
-}
-
-/* --- Labels & Names --- */
-.AtomName,
-.ConName,
-.RuleName {
-  background-color: #000000;
-  color: #ffffff;
-  padding: 5px 10px;
-  align-self: stretch;
-  display: flex;
-  align-items: center;
+  padding-left: var(--space-sm);
 }
 
 .RuleName {
-  display: inline-block;
-  box-shadow: 4px 4px 0px #000000;
-  margin-bottom: 5px;
+  font-family: var(--font-monospace);
+  font-weight: bold;
+  background-color: var(--color-mid-gray);
+  color: var(--color-white);
+  padding: var(--space-sm);
+  box-shadow: var(--shadow-hard);
+  transition: all 0.1s ease-in-out;
+  cursor: pointer;
+  align-self: flex-start;
 }
 
-/* --- Atoms & Data --- */
-.atom {
-  grid-area: atom;
+.RuleName:hover {
+  box-shadow: var(--shadow-none);
+  transform: translate(4px, 4px);
 }
 
-.Atom {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  border: 2px solid #000000;
-  background-color: #ffffff;
-}
-
+.sigma,
 .Subst {
+  padding: var(--space-sm);
+  border: var(--border-width-sm) dotted var(--color-mid-gray);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-top: 5px;
+  gap: var(--space-xs);
+  font-family: var(--font-monospace);
+  background-color: #fafafa;
 }
 
 .SubstItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background-color: #f0f0f0;
-  padding: 4px;
-  border: 2px solid #000;
+  gap: var(--space-sm);
+  color: black;
 }
 
-/* --- Tags & Indexes --- */
-.goalIndex {
-  grid-area: goalIndex;
+.reason {
+  background-color: var(--color-white);
+  color: var(--color-black);
+  padding: var(--space-sm);
+  border: var(--border-standard);
+  font-weight: bold;
 }
 
-.GoalIndex {
-  background-color: #ffff99;
-  border: 2px solid #000000;
-  padding: 5px 10px;
-  font-size: 1.2em;
-  box-shadow: 4px 4px 0px #e6e68a;
+/* State & Interaction Styles */
+.TraceNode:has(> .status > .note.possible) {
+  background-color: var(--color-success-green);
+  color: var(--color-white);
+  border-color: var(--color-black);
 }
 
-.VarIndex {
-  font-size: 0.8em;
-  margin-left: 4px;
-  background-color: #ffffff;
-  color: #000000;
-  border-radius: 0;
-  padding: 0 4px;
-  border-left: 1px solid #000;
+/* Ensure readability of child elements on the new green background */
+.TraceNode:has(> .status > .note.possible) .goal {
+  background-color: var(--color-white);
+  color: var(--color-black);
 }
 
-.opts {
-  grid-area: opts;
-  display: flex;
-  align-items: center;
-  margin-left: auto;
+.TraceNode:has(> .status > .note.possible) .status {
+  background-color: var(--color-white);
+  color: var(--color-black);
+  border-color: var(--color-black);
 }
 
-.GoalOpt {
-  background-color: #ff9900;
-  color: #000000;
-  padding: 2px 8px;
-  border: 2px solid #000000;
-  font-size: 0.9em;
-  text-transform: uppercase;
+.TraceNode:has(> .status > .note.possible) .steps,
+.TraceNode:has(> .status > .note.possible) .substeps {
+  border-left-color: var(--color-white);
+}
+
+/* State & Interaction Styles */
+.TraceNode:has(> .status > .note.impossible) {
+  background-color: var(--color-destructive-red);
+  color: var(--color-white);
+  border-color: var(--color-black);
+}
+
+/* Ensure readability of child elements on the new green background */
+.TraceNode:has(> .status > .note.impossible) .goal {
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+.TraceNode:has(> .status > .note.impossible) .status {
+  background-color: var(--color-white);
+  color: var(--color-black);
+  border-color: var(--color-black);
+}
+
+.TraceNode:has(> .status > .note.impossible) .steps,
+.TraceNode:has(> .status > .note.impossible) .substeps {
+  border-left-color: var(--color-white);
+}
+
+/* State & Interaction Styles */
+.TraceNode:has(> .status.abandoned > .note.impossible) {
+  background-color: var(--color-warning-orange);
+  color: var(--color-white);
+  border-color: var(--color-black);
+}
+
+/* Ensure readability of child elements on the new green background */
+.TraceNode:has(> .status.abandoned > .note.impossible) .goal {
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+.TraceNode:has(> .status.abandoned > .note.impossible) .status {
+  background-color: var(--color-warning-orange);
+  color: var(--color-black);
+  border-color: var(--color-black);
+}
+
+.TraceNode:has(> .status.abandoned > .note.impossible) .steps,
+.TraceNode:has(> .status.abandoned > .note.impossible) .substeps {
+  border-left-color: var(--color-white);
 }
