@@ -8,6 +8,7 @@ module Spec.Engine.Add (tests) where
 
 import Chronolog.Engine as Engine
 import Chronolog.Grammar
+import Data.List
 import Spec.Engine.Common
 import Test.Tasty (TestTree, testGroup)
 import Text.PrettyPrint (render, (<+>))
@@ -25,9 +26,10 @@ tests =
     ]
 
 mkTest :: Int -> Int -> Int -> EngineResult C V -> TestTree
-mkTest a b c =
-  mkTest_Engine
+mkTest a b c _ =
+  mkTest_Engine_visualization
     (render $ pPrint a <+> "+" <+> pPrint b <+> "=" <+> pPrint c)
+    ((concat $ intersperse "_" $ ("add" : (show <$> [a,b,c]))) ++ ".html")
     ( Config
         { initialGas = FiniteGas 50,
           strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
@@ -38,6 +40,7 @@ mkTest a b c =
           useIndexing = True
         }
     )
+    
 
 rulesAdd :: [Rule A C V]
 rulesAdd =
