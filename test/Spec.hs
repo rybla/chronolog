@@ -6,6 +6,7 @@ module Main (main) where
 import qualified Spec.Engine.Add
 import qualified Spec.Engine.AddRelation
 import qualified Spec.Engine.ApplicativeFunctorSubtyping
+import qualified Spec.Engine.ContinueAfterFailure
 import qualified Spec.Engine.CutRule
 import qualified Spec.Engine.ExprAlias
 import qualified Spec.Engine.Library.AugmentDerivation
@@ -34,6 +35,7 @@ tests =
     [ Spec.Unification.tests,
       Spec.Engine.Add.tests,
       Spec.Engine.AddRelation.tests,
+      Spec.Engine.ContinueAfterFailure.tests,
       Spec.Engine.Subtyping.tests,
       Spec.Engine.SuspendAndResume.tests,
       Spec.Engine.SolutionsCount.tests,
