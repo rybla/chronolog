@@ -23,7 +23,7 @@ tests =
           strategy = DepthFirstStrategy defaultDepthFirstStrategyOpts,
           rules = rulesCAF,
           exprAliases = [],
-          goals = [mkGoal 0 $ G J],
+          goals = [mkGoal 0 $ G J "z"],
           shouldSuspend = const False,
           useIndexing = True
         }
@@ -38,16 +38,16 @@ rulesCAF =
       []
       (F I),
     (mkRule "GFF")
-      [gh $ F I ,
-       gh $ F "x"]
-      (G "x")
+      [gh $ F "x",
+       gh $ F "y" ]
+      (G "x" "y")
   ]
 
 pattern F :: Expr C V -> Atom A C V
 pattern F x = Atom "F" [x]
 
-pattern G :: Expr C V -> Atom A C V
-pattern G x = Atom "G" [x]
+pattern G :: Expr C V -> Expr C V -> Atom A C V
+pattern G x y = Atom "G" [x,y]
 
 pattern I :: Expr C V
 pattern I = ConExpr (Con "I" [])
