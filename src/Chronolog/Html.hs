@@ -11,10 +11,10 @@
 
 module Chronolog.Html where
 
-import Control.Monad (when)
-import Control.Monad.State (State, execState, get, modify)
 import Chronolog.Engine
 import Chronolog.Grammar
+import Control.Monad (when)
+import Control.Monad.State (State, execState, get, modify)
 import Data.Foldable (traverse_)
 import Data.Function ((&))
 import Data.Functor ((<&>))
@@ -23,6 +23,7 @@ import qualified Data.Map as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Text.PrettyPrint.HughesPJClass (Doc, Pretty, brackets, doubleQuotes, hcat, hsep, nest, prettyShow, render, text, vcat, (<+>), (<>))
+import Utility (unOrdDoc)
 import Prelude hiding (div, (<>))
 
 el :: String -> String -> [Doc] -> Doc
@@ -124,25 +125,25 @@ renderTrace cfg tr = div "Trace" $ cfg.goals <&> \g -> renderTraceNode g.goalInd
               div "TraceStep failure" $
                 [ div "label" ["failure"],
                   div "goal" [renderGoal goal],
-                  div "reason" [escaped $ "failed goal because:" <+> reason]
+                  div "reason" [escaped $ "failed goal because:" <+> unOrdDoc reason]
                 ]
             SuspendStep {..} ->
               div "TraceStep suspend" $
                 [ div "label" ["suspend"],
                   div "goal" [renderGoal goal],
-                  div "reason" [escaped $ "suspended goal because:" <+> reason]
+                  div "reason" [escaped $ "suspended goal because:" <+> unOrdDoc reason]
                 ]
             ResumeStep {..} ->
               div "TraceStep resume" $
                 [ div "label" ["resume"],
                   div "goal" [renderGoal goal],
-                  div "reason" [escaped $ "resumed goal because:" <+> reason]
+                  div "reason" [escaped $ "resumed goal because:" <+> unOrdDoc reason]
                 ]
             SolveStep {..} ->
               div "TraceStep solve" $
                 [ div "label" ["solve"],
                   div "goal" [renderGoal goal],
-                  div "reason" [escaped $ "solved goal because:" <+> reason]
+                  div "reason" [escaped $ "solved goal because:" <+> unOrdDoc reason]
                 ]
        in case tr.traceSteps Map.!? gi of
             Nothing ->
@@ -211,25 +212,25 @@ renderStep (FailureStep {..}) =
   div "Step failure" $
     [ div "label" ["failure"],
       div "goal" [pPrintEscaped goal],
-      div "reason" ["failed goal because:" <+> reason]
+      div "reason" ["failed goal because:" <+> unOrdDoc reason]
     ]
 renderStep (SuspendStep {..}) =
   div "Step suspend" $
     [ div "label" ["suspend"],
       div "goal" [pPrintEscaped goal],
-      div "reason" ["suspended goal because:" <+> reason]
+      div "reason" ["suspended goal because:" <+> unOrdDoc reason]
     ]
 renderStep (ResumeStep {..}) =
   div "Step resume" $
     [ div "label" ["resume"],
       div "goal" [pPrintEscaped goal],
-      div "reason" ["resumed goal because:" <+> reason]
+      div "reason" ["resumed goal because:" <+> unOrdDoc reason]
     ]
 renderStep (SolveStep {..}) =
   div "Step solve" $
     [ div "label" ["solve"],
       div "goal" [pPrintEscaped goal],
-      div "reason" ["solved goal because:" <+> reason]
+      div "reason" ["solved goal because:" <+> unOrdDoc reason]
     ]
 
 renderGoal :: (Pretty v, Pretty c, Pretty a) => Goal a c v -> Doc

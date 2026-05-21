@@ -49,6 +49,7 @@ exprToPathStrings (VarExpr (Var _ _)) = [[Va]]
 --------------------------------------------------------------------------------
 
 newtype OrderedRule a c v = WrapOrderedRule (Rule a c v)
+  deriving (Show)
 
 -- Not sure if name-based ordering is acceptable
 instance Eq (OrderedRule a c v) where
@@ -90,6 +91,7 @@ setIntersections l = foldr1 Set.intersection l
 data Trie a c v
   = Node (Map (Maybe (PathStringPart a c v)) (Trie a c v))
   | Leaf (TrieSet a c v)
+  deriving (Show, Eq, Ord)
 
 emptyTrie :: Trie a c v
 emptyTrie = Leaf trieSetEmpty

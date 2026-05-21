@@ -268,7 +268,7 @@ mkConExpr c es = c :% es
 
 -- | Substitution of meta-variables
 newtype Subst c v = Subst (Map (Var v) (Expr c v))
-  deriving (Show, Eq, Generic)
+  deriving (Show, Eq, Ord, Generic)
 
 instance Newtype (Subst c v)
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
@@ -11,6 +12,7 @@ import Control.Lens (FunctorWithIndex (imap))
 import Control.Monad (foldM, (>=>))
 import Data.Function ((&))
 import Data.Kind (Type)
+import Data.String (IsString)
 import Data.Traversable (for)
 import Text.PrettyPrint (Doc, comma, hcat, nest, punctuate, text, vcat, (<+>))
 
@@ -123,3 +125,9 @@ foldl' x f = foldl f x
 
 comps :: (Foldable f) => f (a -> a) -> a -> a
 comps = foldl (>>>) id
+
+newtype OrdDoc = OrdDoc {unOrdDoc :: Doc}
+  deriving (Show, Eq, IsString, Semigroup, Monoid)
+
+instance Ord OrdDoc where
+  compare (OrdDoc d1) (OrdDoc d2) = compare (show d1) (show d2)

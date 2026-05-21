@@ -41,7 +41,7 @@ import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
 import ListT (ListT, cons, toList)
-import Text.PrettyPrint.HughesPJClass (Doc, Pretty (pPrint), hang, hcat, text, (<+>))
+import Text.PrettyPrint.HughesPJClass (Pretty (pPrint), hang, hcat, text, (<+>))
 import Utility
 import Prelude hiding (init)
 
@@ -177,6 +177,7 @@ data Env a c v = Env
     sigma :: Subst c v,
     stepsRev :: [Step a c v]
   }
+  deriving (Show, Eq, Ord)
 
 instance (Pretty a, Pretty c, Pretty v) => Pretty (Env a c v) where
   pPrint env =
@@ -266,28 +267,29 @@ data Step a c v
       }
   | FailureStep
       { goal :: Goal a c v,
-        reason :: Doc
+        reason :: OrdDoc
       }
   | SuspendStep
       { goal :: Goal a c v,
-        reason :: Doc
+        reason :: OrdDoc
       }
   | ResumeStep
       { goal :: Goal a c v,
-        reason :: Doc
+        reason :: OrdDoc
       }
   | SolveStep
       { goal :: Goal a c v,
         sigma :: Subst c v,
-        reason :: Doc
+        reason :: OrdDoc
       }
+  deriving (Show, Eq, Ord)
 
 instance (Pretty a, Pretty c, Pretty v) => Pretty (Step a c v) where
   pPrint (ApplyRuleStep {..}) = "apply" <+> hcat [pPrint ruleName, ":"] <+> pPrint goal <+> "<==" <+> pPrint subgoals <+> "with" <+> pPrint sigma
-  pPrint (FailureStep {..}) = "fail" <+> pPrint goal <+> "because" <+> reason
-  pPrint (SuspendStep {..}) = "suspend" <+> pPrint goal <+> "because" <+> reason
-  pPrint (ResumeStep {..}) = "resume" <+> pPrint goal <+> "because" <+> reason
-  pPrint (SolveStep {..}) = "solve" <+> pPrint goal <+> "via" <+> pPrint sigma <+> "because" <+> reason
+  pPrint (FailureStep {..}) = "fail" <+> pPrint goal <+> "because" <+> unOrdDoc reason
+  pPrint (SuspendStep {..}) = "suspend" <+> pPrint goal <+> "because" <+> unOrdDoc reason
+  pPrint (ResumeStep {..}) = "resume" <+> pPrint goal <+> "because" <+> unOrdDoc reason
+  pPrint (SolveStep {..}) = "solve" <+> pPrint goal <+> "via" <+> pPrint sigma <+> "because" <+> unOrdDoc reason
 
 --------------------------------------------------------------------------------
 -- functions
@@ -450,7 +452,7 @@ tryRules goal = do
       do
         env <- get
         tellMsgs
-          [ (Msg.mk 1 $ "failed goal because:" <+> step.reason)
+          [ (Msg.mk 1 $ "failed goal because:" <+> unOrdDoc step.reason)
               { Msg.contents =
                   [ "goal =" <+> pPrint goal,
                     "env =" <+> pPrint env
@@ -470,7 +472,7 @@ tryRules goal = do
           env <- get
           tellMsgs [(Msg.mk 1 "pruning branch since faild a required goal") {Msg.contents = ["goal =" <+> pPrint goal, "env =" <+> pPrint env]}]
           env.suspendedGoals <&>>= \goal' ->
-            tell_traceStep FailureStep {goal = goal', reason = "failed other required goal:" <+> pPrint goal}
+            tell_traceStep FailureStep {goal = goal', reason = OrdDoc $ "failed other required goal:" <+> pPrint goal}
           reject
     else do
       let cutBranches =
@@ -627,7 +629,7 @@ tryRule goal rule = do
                         tell_traceStep
                           ResumeStep
                             { goal = suspendedGoal_curr,
-                              reason = "the suspended goal was refined by a new substitution:" <+> pPrint sigma_uni
+                              reason = OrdDoc $ "the suspended goal was refined by a new substitution:" <+> pPrint sigma_uni
                             }
                         tellMsgs
                           [ (Msg.mk 2 "resume goal")
