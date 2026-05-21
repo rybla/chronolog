@@ -67,6 +67,37 @@ data Config a c v = Config
     useIndexing :: Bool
   }
 
+instance (Show a, Show c, Show v) => Show (Config a c v) where
+  show c =
+    "Config { "
+      <> "initialGas ="
+      <> show c.initialGas
+      <> ", "
+      <> "rules ="
+      <> show c.rules
+      <> ", "
+      <> "goals ="
+      <> show c.goals
+      <> ", "
+      <> "shouldSuspend ="
+      <> "<function>"
+      <> ", "
+      <> "exprAliases ="
+      <> show c.exprAliases
+      <> ", "
+      <> "strategy ="
+      <> show c.strategy
+      <> ", "
+      <> "useIndexing ="
+      <> show c.useIndexing
+      <> " }"
+
+instance (Eq a, Eq c, Eq v) => Eq (Config a c v) where
+  c1 == c2 = (c1.initialGas, c1.rules, c1.goals, c1.exprAliases, c1.strategy, c1.useIndexing) == (c2.initialGas, c2.rules, c2.goals, c2.exprAliases, c2.strategy, c2.useIndexing)
+
+instance (Ord a, Ord c, Ord v) => Ord (Config a c v) where
+  compare c1 c2 = compare (c1.initialGas, c1.rules, c1.goals, c1.exprAliases, c1.strategy, c1.useIndexing) (c2.initialGas, c2.rules, c2.goals, c2.exprAliases, c2.strategy, c2.useIndexing)
+
 defaultConfig :: Config a c v
 defaultConfig =
   Config
@@ -214,7 +245,7 @@ data Strategy
     --   - subgoals are inserted at the beginning of the list of subgoals to
     --     solve next, so they are to be solved before any pre-existing subgoals
     DepthFirstStrategy DepthFirstStrategyOpts
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
 instance Pretty Strategy where
   pPrint = text . show
@@ -224,7 +255,7 @@ data DepthFirstStrategyOpts = DepthFirstStrategyOpts
     -- essentially implies that all goals are treated as required.
     aggressiveDepthFirstStrategyOpt :: Bool
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
 defaultDepthFirstStrategyOpts :: DepthFirstStrategyOpts
 defaultDepthFirstStrategyOpts =
@@ -245,7 +276,7 @@ instance Pretty Error where
 data Gas
   = FiniteGas Int
   | InfiniteGas
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
 instance Pretty Gas where
   pPrint (FiniteGas n) = pPrint n

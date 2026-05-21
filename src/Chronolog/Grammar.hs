@@ -304,6 +304,12 @@ unSubst (Subst m) = m
 -- infinite unfolding during unification.
 newtype ExprAlias c v = ExprAlias (Expr c v -> Maybe (Expr c v))
 
+instance Show (ExprAlias c v) where show _ = "(" <> "ExprAlias " <> "<function>" <> ")"
+
+instance Eq (ExprAlias c v) where _ == _ = True
+
+instance Ord (ExprAlias c v) where compare _ _ = EQ
+
 unExprAlias :: ExprAlias c v -> (Expr c v -> Maybe (Expr c v))
 unExprAlias (ExprAlias f) = f
 
