@@ -137,6 +137,7 @@ data Trace a c v = Trace
   { traceGoals :: Map GoalIndex (Goal a c v),
     traceSteps :: Map GoalIndex [Step a c v]
   }
+  deriving (Show, Eq, Ord)
 
 instance Semigroup (Trace a c v) where
   t1 <> t2 =
