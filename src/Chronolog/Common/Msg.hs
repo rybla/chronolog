@@ -15,6 +15,9 @@ data Msg = Msg
   }
   deriving (Show, Eq)
 
+instance Ord Msg where
+  compare m1 m2 = compare (show m1.title, show m1.contents, m1.level) (show m2.title, show m2.contents, m2.level)
+
 instance Pretty Msg where
   pPrint m =
     brackets (pPrint m.level)
