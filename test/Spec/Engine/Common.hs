@@ -6,15 +6,15 @@
 
 module Spec.Engine.Common where
 
-import Control.Category ((>>>))
-import Control.Monad (when)
-import Control.Monad.Except (runExceptT)
-import Control.Monad.Writer (WriterT (runWriterT))
 import Chronolog.Common.Msg (Msg)
 import qualified Chronolog.Common.Msg as Msg
 import Chronolog.Engine as Engine
 import Chronolog.Grammar
 import Chronolog.Html (renderHtml, renderTrace)
+import Control.Category ((>>>))
+import Control.Monad (when)
+import Control.Monad.Except (runExceptT)
+import Control.Monad.Writer (WriterT (runWriterT))
 import Data.Foldable (traverse_)
 import Data.Function ((&))
 import Data.Functor ((<&>))
@@ -73,7 +73,7 @@ data EngineResult c v
     -- Engine run resulted in each solution branch using a substitution that is
     -- a sub-substitution of the `sigma`.
     EngineSuccessWithSubst (Subst c v)
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
 
 instance (Pretty c, Pretty v) => Pretty (EngineResult c v) where
   pPrint (EngineErrorCatastrophic err) = "catastrophic error:" <+> pPrint err

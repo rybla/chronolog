@@ -12,6 +12,9 @@
 
 module Chronolog.Unification where
 
+import qualified Chronolog.Common as Common
+import qualified Chronolog.Common.Msg as Msg
+import Chronolog.Grammar
 import Control.Lens (makeLenses, (%=), (.=), (^.))
 import Control.Monad (when, zipWithM)
 import Control.Monad.Except (ExceptT, throwError)
@@ -19,9 +22,6 @@ import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.State (StateT, gets)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (tell)
-import qualified Chronolog.Common as Common
-import qualified Chronolog.Common.Msg as Msg
-import Chronolog.Grammar
 import Data.Function ((&))
 import qualified Data.Map as Map
 import qualified Data.Set as Set
@@ -51,7 +51,7 @@ newtype Ctx c v = Ctx
 data Env c v = Env
   { _sigma :: Subst c v
   }
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
 
 instance (Pretty c, Pretty v) => Pretty (Env c v) where
   pPrint Env {..} =
@@ -69,7 +69,7 @@ data Error a c v
   = AtomsError (Atom a c v) (Atom a c v)
   | ExprsError (Expr c v) (Expr c v)
   | OccursError (Var v) (Expr c v)
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
 
 instance (Pretty a, Pretty c, Pretty v) => Pretty (Error a c v) where
   pPrint (AtomsError a1 a2) = pPrint a1 <+> "!~" <+> pPrint a2

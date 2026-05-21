@@ -131,7 +131,7 @@ runT' m = do
 
 data Error
   = OutOfGas
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
 data Trace a c v = Trace
   { traceGoals :: Map GoalIndex (Goal a c v),
