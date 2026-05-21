@@ -44,6 +44,7 @@ data Rule a c v = Rule
     conc :: Atom a c v,
     ruleOpts :: RuleOpts a c v
   }
+  deriving (Show, Eq, Ord)
 
 instance (Pretty a, Pretty c, Pretty v) => Pretty (Rule a c v) where
   pPrint rule =
@@ -80,6 +81,15 @@ data RuleOpts a c v = RuleOpts
     existentialVarsRuleOpt :: Set v
   }
 
+instance (Show v) => Show (RuleOpts a c v) where
+  show ros = "RuleOpts { cutRuleOpts = " <> show ros.cutRuleOpt <> ", suspendRuleOpt = <function>, existentialVarsRuleOpt = " <> show ros.existentialVarsRuleOpt <> " }"
+
+instance (Eq v) => Eq (RuleOpts a c v) where
+  ros1 == ros2 = (ros1.cutRuleOpt == ros2.cutRuleOpt) && (ros1.existentialVarsRuleOpt == ros2.existentialVarsRuleOpt)
+
+instance (Ord v) => Ord (RuleOpts a c v) where
+  compare ros1 ros2 = compare (ros1.cutRuleOpt, ros1.existentialVarsRuleOpt) (ros2.cutRuleOpt, ros2.existentialVarsRuleOpt)
+
 instance (Pretty v) => Pretty (RuleOpts a c v) where
   pPrint ruleOpts =
     braces . commas . concat $
@@ -104,7 +114,7 @@ defaultRuleOpts =
 -- checked by executing a `Bool`-valued function.)
 data Hyp a c v
   = GoalHyp (Goal a c v)
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
 
 instance (Pretty a, Pretty c, Pretty v) => Pretty (Hyp a c v) where
   pPrint (GoalHyp g) =
@@ -124,7 +134,7 @@ data Goal a c v = Goal
     goalOpts :: GoalOpts,
     goalIndex :: GoalIndex
   }
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
 
 instance (Pretty a, Pretty c, Pretty v) => Pretty (Goal a c v) where
   pPrint g =
@@ -140,7 +150,7 @@ data GoalOpts = GoalOpts
   { requiredGoalOpt :: Bool,
     constrainedRulesetGoalOpt :: Maybe (Set RuleName)
   }
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
 
 instance Pretty GoalOpts where
   pPrint opts =
